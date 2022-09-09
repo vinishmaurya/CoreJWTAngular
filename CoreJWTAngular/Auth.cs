@@ -3,21 +3,25 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Security.Claims;
+using DataContaxtClassLibrary;
+using ModelsClassLibrary;
 
 namespace CoreJWTAngular
 {
     public class Auth : IJwtAuth
     {
-        private readonly string username = "123";
-        private readonly string password = "123";
         private readonly string key;
+        APIAuthDAL objAPIAuthDAL = null;
         public Auth(string key)
         {
+            objAPIAuthDAL = new APIAuthDAL();
             this.key = key;
         }
         public string Authentication(string username, string password)
         {
-            if (!(username.Equals(username) || password.Equals(password)))
+            APIAuthMDL objAPIAuthMDL = new APIAuthMDL() { Password = password, UserName = username };
+            Messages objMessages = objAPIAuthDAL.AuthenticateUser(objAPIAuthMDL);
+            if (objMessages.Message_Id <= 0)
             {
                 return null;
             }

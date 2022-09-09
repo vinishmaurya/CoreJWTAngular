@@ -1,3 +1,4 @@
+using DataContaxtClassLibrary;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,12 +15,13 @@ namespace CoreJWTAngular
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -31,6 +33,12 @@ namespace CoreJWTAngular
                 configuration.RootPath = "ClientApp/dist";
             });
             services.AddControllers();
+
+            // Add the whole configuration object here.
+            services.AddSingleton<IConfiguration>(Configuration);
+
+            
+
             var key = "This is my first Test Key";
             services.AddAuthentication(x =>
             {

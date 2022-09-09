@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreJWTAngular", "CoreJWTAngular\CoreJWTAngular.csproj", "{792F7E64-CBDB-4007-9DA4-E28D71AE6AE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreJWTAngular", "CoreJWTAngular\CoreJWTAngular.csproj", "{792F7E64-CBDB-4007-9DA4-E28D71AE6AE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelsClassLibrary", "ModelsClassLibrary\ModelsClassLibrary.csproj", "{BEF93E8D-DEBD-4734-AB49-162CC928ADBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataContaxtClassLibrary", "DataContaxtClassLibrary\DataContaxtClassLibrary.csproj", "{D82B1996-F06A-4A62-A091-80390F4E614C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{792F7E64-CBDB-4007-9DA4-E28D71AE6AE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{792F7E64-CBDB-4007-9DA4-E28D71AE6AE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{792F7E64-CBDB-4007-9DA4-E28D71AE6AE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEF93E8D-DEBD-4734-AB49-162CC928ADBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEF93E8D-DEBD-4734-AB49-162CC928ADBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEF93E8D-DEBD-4734-AB49-162CC928ADBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEF93E8D-DEBD-4734-AB49-162CC928ADBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D82B1996-F06A-4A62-A091-80390F4E614C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D82B1996-F06A-4A62-A091-80390F4E614C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D82B1996-F06A-4A62-A091-80390F4E614C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D82B1996-F06A-4A62-A091-80390F4E614C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
