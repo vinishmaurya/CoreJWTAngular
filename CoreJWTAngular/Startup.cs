@@ -1,7 +1,9 @@
 using DataContaxtClassLibrary;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
@@ -9,16 +11,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net;
 using System.Text;
+using Newtonsoft.Json;
+using ModelsClassLibrary;
+using System;
+using Microsoft.IdentityModel.Logging;
 
 namespace CoreJWTAngular
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        public IConfiguration _configuration { get; }
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
 
         
@@ -26,6 +33,7 @@ namespace CoreJWTAngular
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            IdentityModelEventSource.ShowPII = true;
             services.AddControllersWithViews();
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -35,11 +43,7 @@ namespace CoreJWTAngular
             services.AddControllers();
 
             // Add the whole configuration object here.
-            services.AddSingleton<IConfiguration>(Configuration);
-
-            
-
-            var key = "This is my first Test Key";
+            services.AddSingleton<IConfiguration>(_configuration);
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -48,19 +52,38 @@ namespace CoreJWTAngular
             {
                 x.RequireHttpsMetadata = false;
                 x.SaveToken = true;
+                //x.Authority = Configuration["JWT:Audience"];
                 x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key))
+                    ValidateLifetime = true,
+                    ValidIssuer = _configuration["JWT:Issuer"],
+                    ValidAudience = _configuration["JWT:Audience"],
+                    ClockSkew = TimeSpan.Zero,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]))
                 };
             });
 
-            services.AddSingleton<IJwtAuth>(new Auth(key));
+            services.AddAuthorization(options =>
+            {
+                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+                    JwtBearerDefaults.AuthenticationScheme);
+
+                defaultAuthorizationPolicyBuilder =
+                    defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+
+                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+            });
+
+
+
+            services.AddSingleton<IJwtAuth>(new Auth(_configuration));
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MemberJWTDemo", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Core JWT Angular Integration", Version = "v1" });
             });
         }
 
@@ -71,7 +94,7 @@ namespace CoreJWTAngular
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MemberJWTDemo v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Core JWT Angular Integration v1"));
             }
             else
             {
@@ -88,6 +111,25 @@ namespace CoreJWTAngular
             }
 
             app.UseRouting();
+
+
+            app.Use(async (context, next) =>
+            {
+                await next();
+
+                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                {
+                    context.Response.StatusCode = 200;
+                    context.Response.ContentType = "application/json";
+                    ServiceResult<string> objServiceResult = new ServiceResult<string>();
+                    objServiceResult.Message = "Token Validation Has Failed. Request Access Denied";
+                    objServiceResult.Result = false;
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(objServiceResult));
+                }
+            });
+
+            //// Custom jwt auth middleware to authenticate the token
+            //app.UseMiddleware<JwtMiddleware>();
 
             app.UseAuthentication();
 

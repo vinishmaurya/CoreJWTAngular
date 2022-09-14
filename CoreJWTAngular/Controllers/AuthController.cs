@@ -13,46 +13,92 @@ using System.Threading.Tasks;
 namespace CoreJWTAngular.Controllers
 {
     [Authorize]
+    //[TypeFilter(typeof(CustomAuthorizationFilter))]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IJwtAuth jwtAuth;
-        private readonly IConfiguration configuration;
+        private readonly IJwtAuth _jwtAuth;
+        private readonly IConfiguration _configuration;
+
+        private readonly List<Member> lstMember = new List<Member>()
+        {
+            new Member{Id=1, Name="Kirtesh" },
+            new Member {Id=2, Name="Nitya" },
+            new Member{Id=3, Name="pankaj"}
+        };
         public AuthController(IJwtAuth jwtAuth, IConfiguration config)
         {
-            this.jwtAuth = jwtAuth;
-            configuration = config;
+            _jwtAuth = jwtAuth;
+            _configuration = config;
         }
        
+         // GET: api/<MembersController>
+        [HttpGet]
+        public IEnumerable<Member> AllMembers()
+        {
+            return lstMember;
+        }
+
+        // GET api/<MembersController>/5
+        [HttpGet("{id}")]
+        public Member MemberByid(int id)
+        {
+            return lstMember.Find(x => x.Id == id);
+        }
 
         [AllowAnonymous]
         // POST api/<MembersController>
-        [HttpPost("authentication")]
-        public IActionResult Authentication([FromBody] UserCredential userCredential)
+        [HttpPost("token")]
+        public IActionResult Token([FromBody] APIUserCredentialModel userCredential)
         {
-            string conString = configuration.GetConnectionString("DefaultConnection");
-            string token = jwtAuth.Authentication(userCredential.UserName, userCredential.Password);
-
-            ServiceResult<UserInfo> objServiceResult = new ServiceResult<UserInfo>();
-            if (token != null)
+            TokenInfo TokenInfo_OutObj = null;
+            Messages objMessages = new Messages();
+            TokenInfo_OutObj = _jwtAuth.Authentication(userCredential,out objMessages);
+            ServiceResult<TokenInfo> objServiceResult = new ServiceResult<TokenInfo>();
+            objServiceResult.Message = objMessages.Message;
+            if (TokenInfo_OutObj != null && objMessages.Message_Id == 1)
             {
-                objServiceResult.Data = new UserInfo() 
-                { 
-                    JWTToken=token,
-                    ExpiryDatetime=System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"),
-                    GeneratedDatetime = System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss") 
-                };
-                objServiceResult.Message = "Success!";
+                objServiceResult.Data = TokenInfo_OutObj;
                 objServiceResult.Result = true;
             }
             else
             {
                 objServiceResult.Data = null;
-                objServiceResult.Message = "Authentication Failed!";
                 objServiceResult.Result = false;
             }
             return Ok(objServiceResult);
         }
+
+
+        //[Authorize]
+        //[HttpPost]
+        //[Route("revokeRefreshToken/{username}")]
+        //public async Task<IActionResult> Revoke(string username)
+        //{
+        //    var user = await _userManager.FindByNameAsync(username);
+        //    if (user == null) return BadRequest("Invalid user name");
+
+        //    user.RefreshToken = null;
+        //    await _userManager.UpdateAsync(user);
+
+        //    return NoContent();
+        //}
+
+        //[Authorize]
+        //[HttpPost]
+        //[Route("revokeAllRefreshToken")]
+        //public async Task<IActionResult> RevokeAll()
+        //{
+        //    var users = _userManager.Users.ToList();
+        //    foreach (var user in users)
+        //    {
+        //        user.RefreshToken = null;
+        //        await _userManager.UpdateAsync(user);
+        //    }
+
+        //    return NoContent();
+        //}
+
     }
 }

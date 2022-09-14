@@ -12,15 +12,10 @@ namespace DataContaxtClassLibrary
     public class LockErrors
     {
         #region
-        static DataFunctions objDataFunctions = null;
-        DataSet objDataSet = null;
+        static DataFunctions objDataFunctions = new DataFunctions();
         static string _commandText = string.Empty;
         #endregion
 
-        public LockErrors()
-        {
-            objDataFunctions = new DataFunctions();
-        }
         public static void SetError(string name, string controller, string action, string Source, string message, string type, string Remarks)
         {
             try

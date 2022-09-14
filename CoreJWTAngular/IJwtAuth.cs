@@ -1,12 +1,15 @@
-﻿using System;
+﻿using CoreJWTAngular.Models;
+using ModelsClassLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace CoreJWTAngular
 {
     public interface IJwtAuth
     {
-        string Authentication(string username, string password);
+        TokenInfo Authentication(APIUserCredentialModel userCredential,out Messages objMessages);
     }
 }
